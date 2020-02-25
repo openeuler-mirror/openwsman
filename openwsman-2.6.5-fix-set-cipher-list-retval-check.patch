@@ -1,0 +1,12 @@
+diff -up openwsman-2.6.5/src/server/shttpd/shttpd.c.orig openwsman-2.6.5/src/server/shttpd/shttpd.c
+--- openwsman-2.6.5/src/server/shttpd/shttpd.c.orig	2018-02-21 10:53:24.964163710 +0100
++++ openwsman-2.6.5/src/server/shttpd/shttpd.c	2018-02-21 10:53:31.854162875 +0100
+@@ -1541,7 +1541,7 @@ set_ssl(struct shttpd_ctx *ctx, const ch
+ 
+ 	if (ssl_cipher_list) {
+           int rc = SSL_CTX_set_cipher_list(CTX, ssl_cipher_list);
+-          if (rc != 0) {
++          if (rc != 1) {
+             _shttpd_elog(E_LOG, NULL, "Failed to set SSL cipher list \"%s\"", ssl_cipher_list);
+           }
+         }
