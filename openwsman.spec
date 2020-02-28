@@ -5,7 +5,7 @@
 
 Name:		openwsman
 Version:	2.6.5
-Release:	10
+Release:	11
 Summary:	Opensource Implementation of WS-Management
 License:	BSD
 URL:		http://www.openwsman.org/
@@ -305,6 +305,9 @@ rm -f /var/log/wsmand.log
 %{_mandir}/man8/*
 
 %changelog
+* Fri Feb 28 2020 likexin <likexin4@huawei.com> - 2.6.5-11
+- update release 
+
 * Thu Feb 13 2020 fengbing <fengbing7@huawei.com> - 2.6.5-10
 - Type:N/A
 - ID:N/A
