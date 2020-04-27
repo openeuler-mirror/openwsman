@@ -3,7 +3,7 @@
 
 Name:       openwsman
 Version:    2.6.5
-Release:    12
+Release:    13
 Summary:    Opensource Implementation of WS-Management
 License:    BSD
 URL:        http://www.openwsman.org/
@@ -11,12 +11,13 @@ Source0:    https://github.com/Openwsman/openwsman/archive/v%{version}.tar.gz
 Source1:    openwsmand.8.gz
 Source2:    openwsmand.service
 Source3:    owsmantestcert.sh
-Patch1:	    openwsman-2.4.0-pamsetup.patch
-Patch2:	    openwsman-2.4.12-ruby-binding-build.patch
-Patch3:     openwsman-2.6.2-openssl-1.1-fix.patch
-Patch4:     openwsman-2.6.5-fix-set-cipher-list-retval-check.patch
-Patch5:     openwsman-2.6.5-libcurl-error-codes-update.patch
+Patch0000:  openwsman-2.4.0-pamsetup.patch
+Patch0001:  openwsman-2.4.12-ruby-binding-build.patch
+Patch0002:  openwsman-2.6.2-openssl-1.1-fix.patch
+Patch0003:  openwsman-2.6.5-fix-set-cipher-list-retval-check.patch
+Patch0004:  openwsman-2.6.5-libcurl-error-codes-update.patch
 Patch6000:  CVE-2019-3833.patch
+Patch6001:  0001-Make-python-version-explitic-DBUILD_PYTHON3-or-DBUIL.patch
 
 BuildRequires:	swig libcurl-devel libxml2-devel pam-devel sblim-sfcc-devel python3
 BuildRequires:	python3-devel ruby ruby-devel rubygems-devel perl-interpreter
@@ -135,6 +136,7 @@ cmake \
 	-DPACKAGE_ARCHITECTURE=`uname -m` \
 	-DLIB=%{_lib} \
 	-DBUILD_JAVA=no \
+	-DBUILD_PYTHON=FALSE\
 	..
 make
 
@@ -200,7 +202,6 @@ rm -f /var/log/wsmand.log
 %{_libdir}/libwsman.so.*
 %{_libdir}/libwsman_client.so.*
 %{_libdir}/libwsman_curl_client_transport.so.*
-%{python2_sitearch}/*
 
 %files -n libwsman-devel
 %{_includedir}/*
@@ -208,6 +209,9 @@ rm -f /var/log/wsmand.log
 %{_libdir}/*.so
 
 %files python3
+%{python3_sitearch}/*.so
+%{python3_sitearch}/*.py
+%{python3_sitearch}/__pycache__/*
 
 %files -n rubygem-%{gem_name}
 %dir %{gem_instdir}
@@ -256,6 +260,9 @@ rm -f /var/log/wsmand.log
 %{_mandir}/man8/*
 
 %changelog
+* Mon Apr  27 2020 huanghaitao <huanghaitao8@huawei.com> - 2.6.5-13
+- Restored unpackaged files of python3 subpackage
+
 * Mon Mar  9 2020 likexin <likexin4@huawei.com> - 2.6.5-12
 - rename sub package 
 
