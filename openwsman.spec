@@ -20,8 +20,7 @@ Patch6000:  CVE-2019-3833.patch
 Patch6001:  0001-Make-python-version-explitic-DBUILD_PYTHON3-or-DBUIL.patch
 
 BuildRequires:	swig libcurl-devel libxml2-devel pam-devel sblim-sfcc-devel python3
-BuildRequires:	python3-devel ruby ruby-devel rubygems-devel 
-#perl-interpreter
+BuildRequires:	python3-devel ruby ruby-devel rubygems-devel perl-interpreter
 BuildRequires:	perl-devel perl-generators pkgconfig openssl-devel libwsman-devel
 BuildRequires:	cmake systemd-units gcc gcc-c++ python2 python2-devel
 
