@@ -1,0 +1,273 @@
+From d01533ab1750d8b43be7829edef28ecb006d57cf Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Klaus=20K=C3=A4mpf?= <kkaempf@suse.de>
+Date: Mon, 4 Dec 2017 14:33:17 +0100
+Subject: [PATCH] Make python version explitic: -DBUILD_PYTHON3 or
+ -DBUILD_PYTHON
+
+---
+ CMakeLists.txt                       | 13 +++++--
+ bindings/CMakeLists.txt              |  4 +--
+ bindings/python/CMakeLists.txt       |  6 +++-
+ bindings/python/tests/CMakeLists.txt | 68 ++++++++++++++++++------------------
+ bindings/python/tests/run            |  6 ++--
+ package/openwsman.spec.in            | 29 +++++++++++++++
+ 6 files changed, 83 insertions(+), 43 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8509fc7..8f7b955 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -101,6 +101,7 @@ ENDMACRO(NO_HEADERS_WARNING)
+ # the headers: if it was explicitly set then fail, otherwise
+ # just give a warning message
+ SET( BUILD_PYTHON_EXPLICIT ${BUILD_PYTHON})
++SET( BUILD_PYTHON3_EXPLICIT ${BUILD_PYTHON3})
+ SET( BUILD_RUBY_EXPLICIT ${BUILD_RUBY})
+ SET( BUILD_PERL_EXPLICIT ${BUILD_PERL})
+ SET( BUILD_JAVA_EXPLICIT ${BUILD_JAVA})
+@@ -111,7 +112,13 @@ SET( BUILD_SWIG_PLUGIN_EXPLICIT ${BUILD_SWIG_PLUGIN})
+ OPTION( BUILD_LIBCIM "Build CIM plugin" YES )
+ OPTION( BUILD_EXAMPLES "Build examples" YES )
+ OPTION( BUILD_BINDINGS "Build client bindings and swig server plugin" YES )
+-OPTION( BUILD_PYTHON "Build Python bindings" YES )
++OPTION( BUILD_PYTHON3 "Build Python3 bindings" YES )
++OPTION( BUILD_PYTHON "Build Python2 bindings" YES )
++IF (BUILD_PYTHON3)
++IF (BUILD_PYTHON)
++MESSAGE(FATAL_ERROR "Can only build for Python2 or Python3, but not both")
++ENDIF (BUILD_PYTHON)
++ENDIF (BUILD_PYTHON3)
+ OPTION( BUILD_RUBY "Build Ruby bindings" YES )
+ IF( BUILD_RUBY )
+ OPTION( BUILD_RUBY_GEM "Build Ruby GEM" YES )
+@@ -231,9 +238,9 @@ IF ( NOT SWIG_EXECUTABLE )
+     MESSAGE( FATAL "Cannot build SWIG server plugin" )
+   ENDIF (BUILD_SWIG_PLUGIN_EXPLICIT)
+   SET( BUILD_SWIG_PLUGIN NO )
+-  IF( BUILD_PYTHON_EXPLICIT OR BUILD_RUBY_EXPLICIT OR BUILD_PERL_EXPLICIT OR BUILD_JAVA_EXPLICIT)
++  IF( BUILD_PYTHON3_EXPLICIT OR BUILD_PYTHON_EXPLICIT OR BUILD_RUBY_EXPLICIT OR BUILD_PERL_EXPLICIT OR BUILD_JAVA_EXPLICIT)
+     MESSAGE( ERROR "Cannot build client bindings" )
+-  ENDIF( BUILD_PYTHON_EXPLICIT OR BUILD_RUBY_EXPLICIT OR BUILD_PERL_EXPLICIT OR BUILD_JAVA_EXPLICIT)
++  ENDIF( BUILD_PYTHON3_EXPLICIT OR BUILD_PYTHON_EXPLICIT OR BUILD_RUBY_EXPLICIT OR BUILD_PERL_EXPLICIT OR BUILD_JAVA_EXPLICIT)
+ ELSE ( NOT SWIG_EXECUTABLE )
+   MESSAGE( STATUS "SWIG ${SWIG_VERSION} found at ${SWIG_EXECUTABLE}" )
+   ADD_SUBDIRECTORY(bindings)
+diff --git a/bindings/CMakeLists.txt b/bindings/CMakeLists.txt
+index 7886d98..66ff472 100644
+--- a/bindings/CMakeLists.txt
++++ b/bindings/CMakeLists.txt
+@@ -8,9 +8,9 @@ SET( SWIG_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/openwsman.i" )
+ 
+ include_directories(${CMAKE_BINARY_DIR})
+ 
+-IF( BUILD_PYTHON )
++IF( BUILD_PYTHON3 OR BUILD_PYTHON )
+ add_subdirectory(python)
+-ENDIF( BUILD_PYTHON )
++ENDIF( BUILD_PYTHON3 OR BUILD_PYTHON )
+ 
+ IF( BUILD_RUBY )
+ add_subdirectory(ruby)
+diff --git a/bindings/python/CMakeLists.txt b/bindings/python/CMakeLists.txt
+index 305629b..35ae04c 100644
+--- a/bindings/python/CMakeLists.txt
++++ b/bindings/python/CMakeLists.txt
+@@ -12,7 +12,11 @@ enable_testing()
+ 
+ add_subdirectory(tests)
+ 
+-set(Python_ADDITIONAL_VERSIONS 3.6 3.5 2.7 2.6)
++IF( BUILD_PYTHON3 )
++set(Python_ADDITIONAL_VERSIONS 3.6 3.5)
++ELSE( BUILD_PYTHON3 )
++set(Python_ADDITIONAL_VERSIONS 2.7 2.6)
++ENDIF( BUILD_PYTHON3 )
+ FIND_PACKAGE(PythonLibs)
+ IF (PYTHON_LIBRARY)
+   FIND_PACKAGE(PythonInterp REQUIRED)
+diff --git a/bindings/python/tests/CMakeLists.txt b/bindings/python/tests/CMakeLists.txt
+index 23711b4..92686ec 100644
+--- a/bindings/python/tests/CMakeLists.txt
++++ b/bindings/python/tests/CMakeLists.txt
+@@ -4,55 +4,55 @@
+ ENABLE_TESTING()
+ 
+ 	# loading wsman
+-ADD_TEST(bindings_python_loading      ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} loading.py )
++ADD_TEST(bindings_python_loading      ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} loading.py )
+ 
+ 	# predefined stuff
+-# ADD_TEST(bindings_python_constants  ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} constants.py )
++# ADD_TEST(bindings_python_constants  ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} constants.py )
+ 
+         # Xml bindings
+-# ADD_TEST(bindings_python_xmldoc     ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} xmldoc.py )
+-# ADD_TEST(bindings_python_xmlnode    ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} xmlnode.py )
+-# ADD_TEST(bindings_python_xmlattr    ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} xmlattr.py )
++# ADD_TEST(bindings_python_xmldoc     ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} xmldoc.py )
++# ADD_TEST(bindings_python_xmlnode    ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} xmlnode.py )
++# ADD_TEST(bindings_python_xmlattr    ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} xmlattr.py )
+ 	
+ 	# Client
+-# ADD_TEST(bindings_python_client     ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} client.py )
+-# ADD_TEST(bindings_python_client_bad ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} client_bad.py )
++# ADD_TEST(bindings_python_client     ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} client.py )
++# ADD_TEST(bindings_python_client_bad ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} client_bad.py )
+ 
+ 	# Transport
+-# ADD_TEST(bindings_python_transport  ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} transport.py )
++# ADD_TEST(bindings_python_transport  ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} transport.py )
+ 	
+ 	# ClientOptions
+-# ADD_TEST(bindings_python_options    ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} clientoptions.py )
+-# ADD_TEST(bindings_python_debug      ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} debug.py )
++# ADD_TEST(bindings_python_options    ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} clientoptions.py )
++# ADD_TEST(bindings_python_debug      ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} debug.py )
+         # Identify
+-ADD_TEST(bindings_python_identify     ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} identify.py )
++ADD_TEST(bindings_python_identify     ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} identify.py )
+ 
+ 	# data types
+-# ADD_TEST(bindings_python_fault      ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} fault.py )
++# ADD_TEST(bindings_python_fault      ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} fault.py )
+ 
+-ADD_TEST(bindings_python_epr          ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} epr.py )
++ADD_TEST(bindings_python_epr          ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} epr.py )
+ 
+         # needs a CIMOM
+-# ADD_TEST(bindings_python_computer_system      ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} cim_computer_system.py )
+-# ADD_TEST(bindings_python_operating_system     ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} cim_operating_system.py )
+-# ADD_TEST(bindings_python_cim_process          ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} cim_process.py )
+-# ADD_TEST(bindings_python_system_configuration ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} cim_system_configuration.py )
+-# ADD_TEST(bindings_python_create               ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} create.py )
+-# ADD_TEST(bindings_python_each_child           ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} each_child.py )
+-ADD_TEST(bindings_python_enumerate            ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} enumerate.py )
+-ADD_TEST(bindings_python_add_selector         ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} add_selector.py )
+-ADD_TEST(bindings_python_add_selector2        ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} add_selector2.py )
+-# ADD_TEST(bindings_python_get                  ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} get.py )
+-# ADD_TEST(bindings_python_identify             ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} identify.py )
+-# ADD_TEST(bindings_python_invoke               ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} invoke.py )
+-# ADD_TEST(bindings_python_notepad              ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} notepad.py )
+-# ADD_TEST(bindings_python_nsconsts             ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} nsconsts.py )
+-# ADD_TEST(bindings_python_processes            ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} processes.py )
+-# ADD_TEST(bindings_python_pull                 ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} pull.py )
+-# ADD_TEST(bindings_python_put                  ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} put.py )
+-ADD_TEST(bindings_python_release              ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} release.py )
++# ADD_TEST(bindings_python_computer_system      ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} cim_computer_system.py )
++# ADD_TEST(bindings_python_operating_system     ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} cim_operating_system.py )
++# ADD_TEST(bindings_python_cim_process          ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} cim_process.py )
++# ADD_TEST(bindings_python_system_configuration ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} cim_system_configuration.py )
++# ADD_TEST(bindings_python_create               ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} create.py )
++# ADD_TEST(bindings_python_each_child           ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} each_child.py )
++ADD_TEST(bindings_python_enumerate            ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} enumerate.py )
++ADD_TEST(bindings_python_add_selector         ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} add_selector.py )
++ADD_TEST(bindings_python_add_selector2        ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} add_selector2.py )
++# ADD_TEST(bindings_python_get                  ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} get.py )
++# ADD_TEST(bindings_python_identify             ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} identify.py )
++# ADD_TEST(bindings_python_invoke               ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} invoke.py )
++# ADD_TEST(bindings_python_notepad              ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} notepad.py )
++# ADD_TEST(bindings_python_nsconsts             ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} nsconsts.py )
++# ADD_TEST(bindings_python_processes            ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} processes.py )
++# ADD_TEST(bindings_python_pull                 ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} pull.py )
++# ADD_TEST(bindings_python_put                  ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} put.py )
++ADD_TEST(bindings_python_release              ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} release.py )
+ 
+ 	# needs WinRM system
+-# ADD_TEST(bindings_python_win32_operatingsystem ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} win32_operatingsystem.py )
+-# ADD_TEST(bindings_python_win32_process         ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} win32_process.py )
+-# ADD_TEST(bindings_python_win32_services        ${CMAKE_CURRENT_SOURCE_DIR}/run ${CMAKE_CURRENT_SOURCE_DIR} win32_services.py )
++# ADD_TEST(bindings_python_win32_operatingsystem ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} win32_operatingsystem.py )
++# ADD_TEST(bindings_python_win32_process         ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} win32_process.py )
++# ADD_TEST(bindings_python_win32_services        ${CMAKE_CURRENT_SOURCE_DIR}/run ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} win32_services.py )
+diff --git a/bindings/python/tests/run b/bindings/python/tests/run
+index 5ddc88d..9ec76a7 100755
+--- a/bindings/python/tests/run
++++ b/bindings/python/tests/run
+@@ -2,8 +2,8 @@
+ #
+ # run script for Python tests
+ #
+-# Usage: run <dir> <file>
++# Usage: run <python> <dir> <file>
+ #
+-(cd $1;
++(cd $2;
+  f=`dirname $0`;
+- LD_LIBRARY_PATH=$f/../../../build/src/lib python $2)
++ LD_LIBRARY_PATH=$f/../../../build/src/lib $1 $3)
+diff --git a/package/openwsman.spec.in b/package/openwsman.spec.in
+index 601294a..cbf1ba6 100644
+--- a/package/openwsman.spec.in
++++ b/package/openwsman.spec.in
+@@ -31,7 +31,11 @@ BuildRequires:  sblim-sfcc-devel
+ BuildRequires:  swig >= 2.0.5
+ 
+ BuildRequires:  perl
++%if 0%{?have_python3}
++BuildRequires:  python3-devel
++%else
+ BuildRequires:  python-devel
++%endif
+ 
+ %if 0%{?rhel_version} > 0
+ BuildRequires:  -vim
+@@ -214,6 +218,20 @@ This package provides a Openwsman server plugin to write a
+ WS-Management resource handler in Ruby
+ 
+ 
++%if 0%{?have_python3}
++%package python3
++Summary:        Python3 bindings for openwsman client API
++Group:          Development/Libraries/Python
++%{!?python3_sitelib: %global python3_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
++%{!?python3_sitearch: %global python3_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
++%{!?py_requires: %define py_requires Requires: python3}
++%{py_requires}
++
++%description python3
++This package provides Python3 bindings to access the openwsman client
++API.
++
++%else
+ %package python
+ Summary:        Python bindings for openwsman client API
+ Group:          Development/Libraries/Python
+@@ -226,6 +244,7 @@ Group:          Development/Libraries/Python
+ This package provides Python bindings to access the openwsman client
+ API.
+ 
++%endif
+ 
+ %package ruby
+ Requires:       ruby
+@@ -344,6 +363,9 @@ cmake \
+ %if 0%{?suse_version} == 1010
+   -DBUILD_JAVA=FALSE \
+ %endif
++%if 0%{?have_python3}
++  -DBUILD_PYTHON=FALSE \
++%endif
+   -DCMAKE_VERBOSE_MAKEFILE=TRUE \
+   -DCMAKE_BUILD_TYPE=Release \
+   -DCMAKE_C_FLAGS_RELEASE:STRING="$RPM_OPT_FLAGS -fno-strict-aliasing" \
+@@ -458,10 +480,17 @@ rm -f /var/log/wsmand.log
+ %exclude %{_includedir}/openwsman/cpp/*.h
+ %exclude %{_libdir}/libwsman_clientpp.so
+ 
++%if 0%{?have_python3}
++%files python3
++%defattr(-,root,root)
++%{python3_sitearch}/*.so
++%{python3_sitearch}/*.py*
++%else
+ %files python
+ %defattr(-,root,root)
+ %{python_sitearch}/*.so
+ %{python_sitearch}/*.py*
++%endif
+ 
+ %files ruby
+ %defattr(-,root,root)
+-- 
+1.8.3.1
+
