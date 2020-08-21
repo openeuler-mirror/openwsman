@@ -3,7 +3,7 @@
 
 Name:       openwsman
 Version:    2.6.5
-Release:    13
+Release:    14
 Summary:    Opensource Implementation of WS-Management
 License:    BSD
 URL:        http://www.openwsman.org/
@@ -260,6 +260,12 @@ rm -f /var/log/wsmand.log
 %{_mandir}/man8/*
 
 %changelog
+* Fri Aug 21 2020 lunankun <lunankun@huawei.com> - 2.6.5-14
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:release +1 for rebuild
+
 * Mon Apr  27 2020 huanghaitao <huanghaitao8@huawei.com> - 2.6.5-13
 - Restored unpackaged files of python3 subpackage
 
