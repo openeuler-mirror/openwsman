@@ -3,7 +3,7 @@
 
 Name:       openwsman
 Version:    2.6.5
-Release:    13
+Release:    14
 Summary:    Opensource Implementation of WS-Management
 License:    BSD
 URL:        http://www.openwsman.org/
@@ -22,8 +22,7 @@ Patch6001:  0001-Make-python-version-explitic-DBUILD_PYTHON3-or-DBUIL.patch
 BuildRequires:	swig libcurl-devel libxml2-devel pam-devel sblim-sfcc-devel python3
 BuildRequires:	python3-devel ruby ruby-devel rubygems-devel perl-interpreter
 BuildRequires:	perl-devel perl-generators pkgconfig openssl-devel libwsman-devel
-BuildRequires:	cmake systemd-units gcc gcc-c++ python2 python2-devel
-
+BuildRequires:	cmake systemd-units gcc gcc-c++ python3 
 
 %description
 Opensource Implementation of WS-Management protocol stack
@@ -260,6 +259,9 @@ rm -f /var/log/wsmand.log
 %{_mandir}/man8/*
 
 %changelog
+* Tue Oct 27 2020 Ge Wang <wangge20@huawei.com> - 2.6.5-14
+- remove useless buildrequires of python2 and python2-devel
+
 * Mon Apr  27 2020 huanghaitao <huanghaitao8@huawei.com> - 2.6.5-13
 - Restored unpackaged files of python3 subpackage
 
