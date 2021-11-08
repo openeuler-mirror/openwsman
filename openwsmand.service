@@ -5,6 +5,7 @@ After=syslog.target
 [Service]
 Type=forking
 ExecStart=/usr/sbin/openwsmand -S
+ExecStartPost=/usr/bin/sleep 0.1
 ExecStartPre=/etc/openwsman/owsmantestcert.sh
 PIDFile=/var/run/wsmand.pid
 
