@@ -3,7 +3,7 @@
 
 Name:       openwsman
 Version:    2.6.5
-Release:    14
+Release:    15
 Summary:    Opensource Implementation of WS-Management
 License:    BSD
 URL:        http://www.openwsman.org/
@@ -260,6 +260,9 @@ rm -f /var/log/wsmand.log
 %{_mandir}/man8/*
 
 %changelog
+* Mon Nov 08 2021 xu_ping <xuping33@huawei.com> - 2.6.5-15
+- fix failed to parse pid from pid-file
+
 * Fri Aug 21 2020 lunankun <lunankun@huawei.com> - 2.6.5-14
 - Type:bugfix
 - Id:NA
