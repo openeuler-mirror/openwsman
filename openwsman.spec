@@ -3,9 +3,9 @@
 
 Name:       openwsman
 Version:    2.6.5
-Release:    14
+Release:    15
 Summary:    Opensource Implementation of WS-Management
-License:    BSD
+License:    BSD-3-Clause and MIT
 URL:        http://www.openwsman.org/
 Source0:    https://github.com/Openwsman/openwsman/archive/v%{version}.tar.gz
 Source1:    openwsmand.8.gz
@@ -28,7 +28,7 @@ BuildRequires:	cmake systemd-units gcc gcc-c++ python3
 Opensource Implementation of WS-Management protocol stack
 
 %package -n libwsman1
-License:	BSD
+License:	BSD-3-Clause and MIT
 Summary:	Opensource Implementation of WS-Management
 Provides:	%{name} = %{version}-%{release}
 Obsoletes:	%{name} < %{version}-%{release}
@@ -38,7 +38,7 @@ Opensource Implementation of WS-Management protocol stack
 (Common libraries)
 
 %package -n libwsman-devel
-License:	BSD
+License:	BSD-3-Clause and MIT
 Summary:	Opensource Implementation of WS-Management
 Provides:	%{name}-devel = %{version}-%{release}
 Obsoletes:	%{name}-devel < %{version}-%{release}
@@ -53,14 +53,14 @@ Opensource Implementation of WS-Management stack
 (Development files)
 
 %package client
-License:	BSD
+License:	BSD-3-Clause and MIT
 Summary:	Openwsman Client libraries
 
 %description client
 Openwsman Client libraries.
 
 %package server
-License:	BSD
+License:	BSD-3-Clause and MIT
 Summary:	Openwsman Server and service libraries
 Requires:	libwsman1 = %{version}-%{release}
 
@@ -68,7 +68,7 @@ Requires:	libwsman1 = %{version}-%{release}
 Openwsman Server and service libraries.
 
 %package python3
-License:	BSD
+License:	BSD-3-Clause and MIT
 Summary:	Python bindings for openwsman client API
 Requires:	python3
 Requires:	libwsman1 = %{version}-%{release}
@@ -78,7 +78,7 @@ Requires:	libwsman1 = %{version}-%{release}
 This package provides Python3 bindings to access the openwsman client API.
 
 %package -n rubygem-%{gem_name}
-License:	BSD
+License:	BSD-3-Clause and MIT
 Summary:	Ruby bindings for openwsman client API
 Obsoletes:	%{name}-ruby < %{version}-%{release}
 
@@ -94,7 +94,7 @@ This package provides HTML documentation for the Openwsman Ruby
 bindings.
 
 %package perl
-License:	BSD
+License:	BSD-3-Clause and MIT
 Requires:	perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Summary:	Perl bindings for openwsman client API
 Requires:	libwsman1 = %{version}-%{release}
@@ -259,6 +259,9 @@ rm -f /var/log/wsmand.log
 %{_mandir}/man8/*
 
 %changelog
+* Tue May 10 2022 yaoxin <yaoxin30@h-partners.com> - 2.6.5-15
+- License compliance rectification
+
 * Tue Oct 27 2020 Ge Wang <wangge20@huawei.com> - 2.6.5-14
 - remove useless buildrequires of python2 and python2-devel
 
