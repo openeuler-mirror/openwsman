@@ -3,7 +3,7 @@
 
 Name:       openwsman
 Version:    2.6.5
-Release:    14
+Release:    15
 Summary:    Opensource Implementation of WS-Management
 License:    BSD
 URL:        http://www.openwsman.org/
@@ -259,6 +259,9 @@ rm -f /var/log/wsmand.log
 %{_mandir}/man8/*
 
 %changelog
+* Wed Nov 9 2022 caodongxia <caodongxia@h-partners.com> - 2.6.5-15
+- fix pid file location and can not open problem
+
 * Tue Oct 27 2020 Ge Wang <wangge20@huawei.com> - 2.6.5-14
 - remove useless buildrequires of python2 and python2-devel
 
