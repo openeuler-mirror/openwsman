@@ -3,7 +3,7 @@
 
 Name:       openwsman
 Version:    2.6.5
-Release:    15
+Release:    16
 Summary:    Opensource Implementation of WS-Management
 License:    BSD-3-Clause and MIT
 URL:        http://www.openwsman.org/
@@ -124,6 +124,10 @@ mkdir build
 export RPM_OPT_FLAGS="$RPM_OPT_FLAGS -DNO_SSL_CALLBACK"
 export CFLAGS="-D_GNU_SOURCE -fPIE -DPIE"
 export LDFLAGS="$LDFLAGS -Wl,-z,now -pie"
+%if "%toolchain" == "clang"
+    CFLAGS="$CFLAGS -Wno-error=int-conversion"
+    export CFLAGS
+%endif
 cd build
 cmake \
 	-DCMAKE_INSTALL_PREFIX=/usr \
@@ -259,6 +263,9 @@ rm -f /var/log/wsmand.log
 %{_mandir}/man8/*
 
 %changelog
+* Mon Jun 26 2023 Xiaoya Huang <huangxiaoya@iscas.ac.cn> - 2.6.5-16
+- Add warning options to suppress warnings
+
 * Tue May 10 2022 yaoxin <yaoxin30@h-partners.com> - 2.6.5-15
 - License compliance rectification
 
